@@ -120,6 +120,16 @@ uint16_t __fastcall Hook_FeatureCtor2(__int64 a1, const char* category)
 	return Orig_FeatureCtor2(a1, category);
 }
 
+FILE* hashes;
+
+static __int64(__cdecl* Orig_RegisterHashString)(__int64 a1, const char* str);
+__int64 __fastcall Hook_RegisterHashString(__int64 a1, const char* str)
+{
+	fprintf(hashes, "{ \"%s\", 0x%llx },\n", str, a1);
+	fflush(hashes);
+	return Orig_RegisterHashString(a1, str);
+}
+
 DWORD WINAPI OnAttachImpl(LPVOID lpParameter)
 {
 	utils::log("[+] OnAttachImpl");
@@ -130,6 +140,7 @@ DWORD WINAPI OnAttachImpl(LPVOID lpParameter)
 	MH_CreateHook(hook::get_pattern("E8 ? ? ? ? 48 85 C0 74 ? 0F B7 10", -0x14), Hook_SetFeatureDefault, (void**)&Orig_SetFeatureDefault);
 	MH_CreateHook(hook::get_pattern("4C 89 41 08 48 89 01 33 C0 48 89 41 18", -0x07), Hook_FeatureCtor, (void**)&Orig_FeatureCtor);
 	MH_CreateHook(hook::pattern("48 8D ? ? ? ? ? 4C 89 41 08 48 89 01 33").count(2).get(1).get<void*>(), Hook_FeatureCtor2, (void**)&Orig_FeatureCtor2);
+	MH_CreateHook(hook::get_pattern("48 83 EC 38 33 C0 48 89 54 24 20"), Hook_RegisterHashString, (void**)&Orig_RegisterHashString);
 
 	if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK)
 	{
@@ -181,6 +192,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 		else
 		{
 			AttachConsole();
+
+			hashes = fopen("hashlist.txt", "w");
 
 			// IsDebuggerPresent int3 traps
 			{
