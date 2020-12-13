@@ -1,0 +1,6 @@
+[submodule "vendor/injector"]
+	path = vendor/injector
+	url = https://github.com/thelink2012/injector
+[submodule "vendor/minhook"]
+	path = vendor/minhook
+	url = https://github.com/TsudaKageyu/minhook

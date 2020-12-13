@@ -21,7 +21,4 @@ namespace utils
 	std::vector<std::string> split(const std::string& s, char delim);
 	std::vector<std::string> get_directories(const std::string& startDirectory);
 	bool ends_with(std::string const& fullString, std::string const& ending);
-
-	void log(const char* message, ...);
-	void log(const wchar_t* message, ...);
 }

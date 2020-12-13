@@ -34,17 +34,6 @@ namespace hook
     // sets the base to the process main base
     void set_base();
 
-	template<typename T>
-	inline uintptr_t get_adjusted(T address)
-	{
-		if ((uintptr_t)address >= 0x140000000 && (uintptr_t)address <= 0x146000000)
-		{
-			return (uintptr_t)address + baseAddressDifference;
-	    }
-
-		return (uintptr_t)address;
-	}
-
     inline uintptr_t getRVA(uintptr_t rva)
     {
         set_base();
