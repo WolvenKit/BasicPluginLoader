@@ -339,5 +339,4 @@ ASALocalRun/
 
 # our ignores
 Build/
-UnityAssemblyInjector/deps/include
-UnityAssemblyInjector/deps/lib
+src/loader/buildnumber.h

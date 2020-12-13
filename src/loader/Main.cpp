@@ -32,9 +32,45 @@ void AttachConsole()
 	freopen("CONIN$", "r", stdin);
 }
 
+bool ends_with(std::string const& fullString, std::string const& ending)
+{
+	if (fullString.length() >= ending.length())
+	{
+		return (0 == fullString.compare(fullString.length() - ending.length(), ending.length(), ending));
+	}
+	else
+	{
+		return false;
+	}
+}
+
+std::string get_relative_path(const std::string& path)
+{
+	static std::string relPath;
+
+	if (relPath.empty())
+	{
+		char exeName[512];
+		GetModuleFileNameA(GetModuleHandle(NULL), exeName, sizeof(exeName));
+
+		char* exeBaseName = strrchr(exeName, '\\');
+		exeBaseName[0] = L'\0';
+
+		relPath = exeName;
+		relPath += "\\";
+
+		GetFullPathNameA(relPath.c_str(), sizeof(exeName), exeName, nullptr);
+
+		relPath = exeName;
+		relPath += "\\";
+	}
+
+	return relPath + path;
+}
+
 DWORD WINAPI OnAttach(LPVOID lpParameter)
 {
-	std::filesystem::path plugins_path("plugins\\");
+	std::filesystem::path plugins_path(get_relative_path("plugins\\"));
 	std::filesystem::directory_iterator it(plugins_path), end;
 
 	while (it != end)
@@ -58,18 +94,6 @@ DWORD WINAPI OnAttach(LPVOID lpParameter)
 	}
 
 	return 0;
-}
-
-bool ends_with(std::string const& fullString, std::string const& ending)
-{
-	if (fullString.length() >= ending.length())
-	{
-		return (0 == fullString.compare(fullString.length() - ending.length(), ending.length(), ending));
-	}
-	else
-	{
-		return false;
-	}
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
