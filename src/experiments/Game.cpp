@@ -9,11 +9,11 @@ inline void SetPattern(TFn& func, const char(&pattern)[Len], int offset = 0)
 
 AddLocalizationEntry_t AddLocalizationEntry;
 GetArchiveName_t GetArchiveName;
+Hash2String_t Hash2String;
 
 void AddGameFunctions()
 {
 	SetPattern(AddLocalizationEntry, "48 85 D2 74 10 48 C7 C0 FF", -21);
 	SetPattern(GetArchiveName, "81 79 14 00 00 00 40 48 8B C1");
-	//SetPattern(Name2Hash, "48 89 5C 24 ? 48 89 74 24 ? 48 89 7C 24 ? 41 56 48 83 EC ? 4C 8B F1 48 8B F2 48 8B CA E8 ? ? ? ? 48");
-	//SetPattern(Hash2Name, "48 83 EC ? 33 C0 48 89 54 24 ? 48 85 D2 74 ? 38 02 74 ? 48");
+	SetPattern(Hash2String, "48 83 EC ? 48 8B 11 48 8D 4C 24 ? E8 ? ? ? ? 48 8B 00 48 83 C4 ? C3");
 }

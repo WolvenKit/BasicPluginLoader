@@ -67,6 +67,25 @@ void Hook_LoadArchive(void* a1, __int64* a2)
 	Orig_LoadArchive(a1, a2);
 }
 
+FILE* commands;
+
+static __int64(__cdecl* Orig_SetCommandCategory)(__int64 a1, const char* category);
+__int64 Hook_SetCommandCategory(__int64 a1, const char* category)
+{
+	fprintf(commands, "%s\n", category);
+	fflush(commands);
+	return Orig_SetCommandCategory(a1, category);
+}
+
+static __int64(__cdecl* Orig_AddCommand)(__int64 a1, __int64 a2, __int64 hash, __int64 a4, __int64 a5, int a6);
+__int64 Hook_AddCommand(__int64 a1, __int64 a2, __int64 hash, __int64 a4, __int64 a5, int a6)
+{
+	auto hashStr = Hash2String(&hash);
+	fprintf(commands, "\t%s\n", hashStr);
+	fflush(commands);
+	return Orig_AddCommand(a1, a2, hash, a4, a5, a6);
+}
+
 // Game.cpp
 void AddGameFunctions();
 
@@ -77,6 +96,7 @@ DWORD WINAPI OnAttach(LPVOID lpParameter)
 	AddGameFunctions();
 
 	hashes = fopen("hashes.txt", "w");
+	commands = fopen("commands.txt", "w");
 
 	hook::set_base((uintptr_t)GetModuleHandle(nullptr));
 
@@ -89,13 +109,16 @@ DWORD WINAPI OnAttach(LPVOID lpParameter)
 	//MH_CreateHook(hook::get_pattern("48 89 5C 24 08 57 48 83 EC 20 41 B9 40"), Hook_SomeLogFunc, (void**)Orig_SomeLogFunc);
 	MH_CreateHook(hook::get_pattern("48 8D 54 24 20 E8 ? ? ? ? EB 05", -0x47), Hook_LoadArchive, (void**)&Orig_LoadArchive);
 
+	MH_CreateHook((void*)hook::get_adjusted(0x1401BFF90), Hook_SetCommandCategory, (void**)&Orig_SetCommandCategory);
+	MH_CreateHook((void*)hook::get_adjusted(0x140224D20), Hook_AddCommand, (void**)&Orig_AddCommand);
+
 	if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK)
 	{
 		logger::write("[*] OnAttach: failed hooking");
 	}
 
 	// enable debug menu
-	if (false)
+	//if (false)
 	{
 		auto patterns = hook::pattern("48 FF 02 4D 85 C0 74 04");
 		if (patterns.size() == 2)
@@ -148,6 +171,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 	if (ul_reason_for_call == DLL_PROCESS_DETACH)
 	{
 		MH_DisableHook(MH_ALL_HOOKS);
+		fclose(hashes);
+		fclose(commands);
 	}
 
 	return true;
