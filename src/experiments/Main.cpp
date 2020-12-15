@@ -111,6 +111,8 @@ DWORD WINAPI OnAttach(LPVOID lpParameter)
 
 	// skip crc hash verification while loading archives
 	injector::WriteMemory<BYTE>(hook::get_pattern("8B F8 85 C0 74 36 48 8B CB", 4), 0xEB, true);
+	injector::WriteMemory<BYTE>(hook::get_pattern("48 3B C1 74 0A B8 03 00 00 00 E9 6C 03 00 00", 2), 0xC0, true);
+	injector::WriteMemory<BYTE>(hook::get_pattern("48 3B C1 74 0A B8 03 00 00 00 E9 A2 01 00 00", 2), 0xC0, true);
 	
 	//injector::MakeNOP(hook::get_adjusted(0x140AC82F7), 6); // DrawDebugOverlay
 	//injector::MakeNOP(hook::get_adjusted(0x140AD3EE6), 6); // imgui?
