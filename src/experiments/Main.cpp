@@ -59,6 +59,14 @@ __int64 Hook_SomeLogFunc(__int64 a1, const char** a2)
 	return Orig_SomeLogFunc(a1, a2);
 }
 
+static void(__cdecl* Orig_LoadArchive)(void* a1, __int64* a2);
+void Hook_LoadArchive(void* a1, __int64* a2)
+{
+	auto an = GetArchiveName(a2);
+	logger::write("Loading archive %s", an);
+	Orig_LoadArchive(a1, a2);
+}
+
 // Game.cpp
 void AddGameFunctions();
 
@@ -66,7 +74,7 @@ DWORD WINAPI OnAttach(LPVOID lpParameter)
 {
 	logger::write("[+] OnAttach");
 
-	//AddGameFunctions();
+	AddGameFunctions();
 
 	hashes = fopen("hashes.txt", "w");
 
@@ -79,6 +87,7 @@ DWORD WINAPI OnAttach(LPVOID lpParameter)
 	MH_CreateHook(hook::get_pattern("48 83 EC 38 33 C0 48 89 54 24 20"), Hook_RegisterHashString, (void**)&Orig_RegisterHashString);
 	MH_CreateHook(hook::get_pattern("48 83 EC 38 33 C0 48 89 54 24 20"), Hook_RegisterHashString, (void**)&Orig_RegisterHashString);
 	//MH_CreateHook(hook::get_pattern("48 89 5C 24 08 57 48 83 EC 20 41 B9 40"), Hook_SomeLogFunc, (void**)Orig_SomeLogFunc);
+	MH_CreateHook(hook::get_pattern("48 8D 54 24 20 E8 ? ? ? ? EB 05", -0x47), Hook_LoadArchive, (void**)&Orig_LoadArchive);
 
 	if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK)
 	{
@@ -132,7 +141,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 		freopen("CON", "w", stdout);
 		freopen("CONIN$", "r", stdin);
 
-		CreateThread(nullptr, 0, OnAttach, hModule, 0, nullptr);
+		OnAttach(hModule);
+		//CreateThread(nullptr, 0, OnAttach, hModule, 0, nullptr);
 	}
 
 	if (ul_reason_for_call == DLL_PROCESS_DETACH)
