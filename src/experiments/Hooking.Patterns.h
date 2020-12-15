@@ -44,6 +44,17 @@ namespace hook
 #endif
     }
 
+	template<typename T>
+	inline uintptr_t get_adjusted(T address)
+	{
+		if ((uintptr_t)address >= 0x140000000 && (uintptr_t)address <= 0x146000000)
+		{
+			return (uintptr_t)address + baseAddressDifference;
+		}
+
+		return (uintptr_t)address;
+	}
+
     class pattern_match
     {
     private:

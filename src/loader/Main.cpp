@@ -105,8 +105,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 
 		if (!ends_with(fileName, "REDEngineErrorReporter.exe"))
 		{
-			std::filesystem::create_directory("plugins\\");
-			std::filesystem::create_directory("plugins\\errors\\");
+			std::filesystem::create_directory(get_relative_path("plugins\\"));
+			std::filesystem::create_directory(get_relative_path("plugins\\errors\\"));
 
 			AttachConsole();
 			logger::write("Version " BUILDNUMBER_STR " built by " BUILDHOST "\n");
